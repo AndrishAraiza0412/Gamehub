@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard — GameHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #18191a; color: #e4e6eb; }
+        .top-navbar { background-color: #242526; height: 56px; border-bottom: 1px solid #3a3b3c; }
+        .card { background:#242526; border: 1px solid #3a3b3c; border-radius:12px; }
+    </style>
+</head>
+<body>
+    <div class="top-navbar d-flex align-items-center px-4">
+        <span class="fw-bold">Game<span style="color:#2374e1">Hub</span> Admin</span>
+        <div class="ms-auto">
+            <a href="/" class="btn btn-sm btn-outline-light me-2">Ver Sitio</a>
+            <a href="/logout" class="btn btn-sm btn-outline-danger">Salir</a>
+        </div>
+    </div>
+
+    <div class="container-fluid px-4 mt-4 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0">Panel de Control</h4>
+            <div class="d-flex gap-2">
+                <a href="/admin/genero/nuevo" class="btn btn-sm btn-outline-primary">Nueva Categoría</a>
+                <a href="/admin/juego/nuevo" class="btn btn-sm btn-outline-primary">Nueva Comunidad</a>
+                <a href="/admin/nuevo" class="btn btn-sm btn-primary">Nuevo Post</a>
+            </div>
+        </div>
+
+        <h5 class="mb-3">Publicaciones Recientes</h5>
+        <div class="card mb-5">
+            <div class="card-body p-0 table-responsive">
+                <table class="table table-dark table-hover mb-0">
+                    <thead><tr><th class="ps-4">Título</th><th>Juego</th><th>Acciones</th></tr></thead>
+                    <tbody>
+                        {% for post in posts %}
+                        <tr>
+                            <td class="ps-4">{{ post.title }}</td>
+                            <td>{{ post.game.name }}</td>
+                            <td>
+                                <a href="/admin/editar/{{ post.id }}" class="btn btn-sm btn-link">Editar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h5 class="mb-3">Comunidades Activas</h5>
+        <div class="card">
+            <div class="card-body p-0 table-responsive">
+                <table class="table table-dark table-hover mb-0">
+                    <thead><tr><th class="ps-4">Juego</th><th>Categoría</th><th>Acciones</th></tr></thead>
+                    <tbody>
+                        {% for g in games %}
+                        <tr>
+                            <td class="ps-4">{{ g.icon_emoji }} {{ g.name }}</td>
+                            <td>{{ g.genre.name }}</td>
+                            <td>
+                                <a href="/admin/juego/editar/{{ g.id }}" class="btn btn-sm btn-outline-primary py-0">Editar</a>
+                                <a href="/admin/juego/eliminar/{{ g.id }}" 
+                                   class="btn btn-sm btn-outline-danger py-0 ms-1" 
+                                   onclick="return confirm('¿Estás seguro? Se borrará la comunidad y TODOS los posts que tenga adentro.');">
+                                   Borrar
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

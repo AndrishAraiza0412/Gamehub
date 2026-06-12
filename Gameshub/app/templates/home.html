@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameHub — Inicio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/comunidades/rocket-league.css') }}">
+    
+    <style>
+        body { background-color: #18191a; color: #e4e6eb; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .top-navbar { background-color: #242526; height: 56px; border-bottom: 1px solid #3a3b3c; position: sticky; top: 0; z-index: 1000; }
+        .main-layout { display: grid; grid-template-columns: 240px 1fr 300px; gap: 20px; max-width: 1400px; margin: 0 auto; padding: 20px; }
+        @media (max-width: 1100px) { .main-layout { grid-template-columns: 240px 1fr; } .right-sidebar { display: none; } }
+        @media (max-width: 768px) { .main-layout { grid-template-columns: 1fr; } .left-sidebar { display: none; } }
+        
+        .left-sidebar { position: sticky; top: 76px; height: calc(100vh - 76px); overflow-y: auto; }
+        .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: #e4e6eb; text-decoration: none; font-weight: 500; transition: background 0.2s; margin-bottom: 2px; }
+        .sidebar-item:hover { background-color: #3a3b3c; color: #fff; }
+        .sidebar-item.active { background-color: rgba(35, 116, 225, 0.1); color: #2374e1; }
+        .sidebar-section-title { font-size: 0.75rem; color: #b0b3b8; font-weight: bold; text-transform: uppercase; margin: 20px 0 10px 12px; letter-spacing: 0.5px; }
+        
+        .feed-container { max-width: 680px; margin: 0 auto; width: 100%; }
+        .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; background: #242526; padding: 12px; border-radius: 12px; border: 1px solid #3a3b3c; }
+        .filter-btn { background: none; border: none; color: #b0b3b8; font-weight: bold; padding: 6px 16px; border-radius: 20px; transition: 0.2s; font-size: 0.95rem; }
+        .filter-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .filter-btn.active { background: rgba(35, 116, 225, 0.1); color: #2374e1; }
+        
+        .post-card { background: #242526; border: 1px solid #3a3b3c; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+        .post-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .post-game-tag { background: #2374e1; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+        .post-game-tag:hover { color: white; opacity: 0.9; }
+        .post-date-header { color: #b0b3b8; font-size: 0.85rem; }
+        .post-title { font-size: 1.2rem; font-weight: bold; color: #e4e6eb; margin-bottom: 8px; }
+        .post-content { color: #b0b3b8; font-size: 0.95rem; line-height: 1.5; }
+        .post-content img, .post-content iframe { max-width: 100%; border-radius: 10px; margin-top: 10px; }
+        
+        .post-footer { display: flex; gap: 24px; margin-top: 16px; border-top: 1px solid #3a3b3c; padding-top: 12px; }
+        .action-btn { background: none; border: none; color: #b0b3b8; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 6px; transition: 0.2s; cursor: pointer; }
+        .action-btn:hover { background: rgba(255,255,255,0.05); color: #e4e6eb; }
+        .action-btn.liked { color: #f91880; }
+        .action-btn.saved { color: #2374e1; }
+        
+        .right-sidebar { position: sticky; top: 76px; height: max-content; }
+        .widget-box { background: #242526; border: 1px solid #3a3b3c; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+        .widget-title { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #b0b3b8; font-weight: bold; text-transform: uppercase; margin-bottom: 16px; }
+        .trending-item { margin-bottom: 16px; }
+        .trending-item:last-child { margin-bottom: 0; }
+        .trending-game { display: inline-flex; align-items: center; gap: 4px; background: #2374e1; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; text-decoration: none; margin-bottom: 4px; }
+        .trending-date { color: #b0b3b8; font-size: 0.75rem; margin-left: 6px; }
+        .trending-title { font-weight: bold; font-size: 0.95rem; color: #e4e6eb; margin-bottom: 2px; line-height: 1.3; }
+        
+        .left-sidebar::-webkit-scrollbar, .right-sidebar::-webkit-scrollbar { display: none; }
+        .left-sidebar, .right-sidebar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body>
+
+    <div class="top-navbar d-flex align-items-center px-4">
+        <div class="d-flex align-items-center gap-2">
+            <span class="fs-4">🎮</span>
+            <span class="fw-bold fs-5">Game<span style="color:#2374e1">Hub</span></span>
+        </div>
+        <div class="d-flex justify-content-center flex-grow-1">
+            <form action="/buscar" method="GET" class="d-flex" style="width: 100%; max-width: 500px;">
+                <div class="input-group">
+                    <span class="input-group-text bg-black border-secondary text-secondary" style="border-right: none;"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control bg-black border-secondary text-white" placeholder="Buscar guías, noticias..." style="border-left: none;" value="{{ query or '' }}">
+                </div>
+            </form>
+        </div>
+        <div class="d-flex gap-3 align-items-center">
+            {% if session.get('username') %}
+                {% if session.get('role') == 'superadmin' %}
+                    <a href="/admin" class="btn btn-sm btn-warning px-3"><i class="bi bi-gear"></i> Admin</a>
+                {% endif %}
+                <span class="text-secondary small d-flex align-items-center">👤 {{ session.get('username') }}</span>
+                <a href="#" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#modalLogout">Cerrar sesión</a>
+            {% else %}
+                <a href="/login" class="text-secondary text-decoration-none small fw-bold">Iniciar sesión</a>
+                <a href="/register" class="btn btn-sm px-3 fw-bold" style="background:#e4e6eb; color:#000; border-radius: 20px;">Registrarse</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <aside class="left-sidebar">
+            <a href="/" class="sidebar-item {% if request.path == '/' %}active{% endif %}">
+                <span style="font-size: 1.2rem;">🏠</span> Inicio
+            </a>
+            <a href="/guardados" class="sidebar-item {% if request.path == '/guardados' %}active{% endif %}">
+                <span style="font-size: 1.2rem;">🔖</span> Guardados
+            </a>
+            <a href="/mis-comunidades" class="sidebar-item {% if request.path == '/mis-comunidades' %}active{% endif %}">
+                <span style="font-size: 1.2rem;">🌟</span> Mis Comunidades
+            </a>
+            
+            {% for genre in genres %}
+            <div class="sidebar-section-title">{{ genre.icon_emoji }} {{ genre.name }}</div>
+            {% for game in genre.games %}
+            <a href="/categoria/{{ game.slug }}" class="sidebar-item">
+                <span style="font-size: 1.1rem;">{{ game.icon_emoji }}</span> {{ game.name }}
+            </a>
+            {% endfor %}
+            {% endfor %}
+        </aside>
+
+        <main class="feed-container">
+            {% if section_title %}
+            <h5 class="fw-bold mb-4 px-2" style="color: #2374e1;"><i class="bi bi-stars"></i> {{ section_title }}</h5>
+            {% endif %}
+
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="ordenarPosts('recientes', this)"><i class="bi bi-clock me-1"></i> Recientes</button>
+                <button class="filter-btn" onclick="ordenarPosts('populares', this)"><i class="bi bi-fire text-warning me-1"></i> Populares</button>
+            </div>
+
+            <div id="posts-list">
+                {% for post in posts %}
+                {% set current_user_id = session.get('user_id') %}
+                {% set is_liked = false %}{% set is_saved = false %}
+                {% for u in post.liked_by %}{% if u.id == current_user_id %}{% set is_liked = true %}{% endif %}{% endfor %}
+                {% for u in post.saved_by %}{% if u.id == current_user_id %}{% set is_saved = true %}{% endif %}{% endfor %}
+                
+                <div class="post-card" data-likes="{{ post.liked_by|length }}" data-date="{{ post.created_at.timestamp() }}">
+                    <div class="post-header">
+                        <a href="/categoria/{{ post.game.slug }}" class="post-game-tag" style="background-color: {{ post.game.accent_color }};">
+                            {{ post.game.icon_emoji }} {{ post.game.name }}
+                        </a>
+                        <span class="post-date-header">{{ post.created_at.strftime('%d %b %Y') }}</span>
+                    </div>
+                    
+                    <div class="post-title">{{ post.title }}</div>
+                    <div class="post-content">{{ post.content | safe }}</div>
+                    
+                    <div class="post-footer">
+                        <button class="action-btn {% if is_liked %}liked{% endif %}" onclick="toggleLike({{ post.id }}, this)">
+                            <i class="bi bi-heart{% if is_liked %}-fill{% endif %}"></i> 
+                            <span class="like-count" style="display: {% if post.liked_by|length == 0 %}none{% else %}inline{% endif %};">{{ post.liked_by|length }}</span> Me gusta
+                        </button>
+                        <button class="action-btn" onclick="toggleComments({{ post.id }})">
+                            <i class="bi bi-chat"></i> 
+                            <span style="display: {% if post.comments|length == 0 %}none{% else %}inline{% endif %};">{{ post.comments|length }}</span> Comentar
+                        </button>
+                        <button class="action-btn {% if is_saved %}saved{% endif %}" onclick="toggleSave({{ post.id }}, this)">
+                            <i class="bi bi-bookmark{% if is_saved %}-fill{% endif %}"></i> Guardar
+                        </button>
+                    </div>
+
+                    <div id="comments-{{ post.id }}" class="mt-3 pt-3" style="display:none; border-top:1px solid #3a3b3c;">
+                        <div id="comments-list-{{ post.id }}">
+                            {% for c in post.comments %}
+                            <div class="mb-2 position-relative" id="comment-{{ c.id }}">
+                                <strong style="color:var(--rl-blue, #2374e1); font-size:0.9rem;">{{ c.author.username }}</strong>
+                                <span class="text-secondary" style="font-size:0.75rem; margin-left:8px;">{{ c.created_at.strftime('%d/%m/%Y') }}</span>
+                                
+                                {% if current_user_id == c.user_id %}
+                                <div class="d-inline-block float-end">
+                                    <button class="btn btn-link text-warning p-0 me-2" style="font-size: 0.8rem; text-decoration: none;" onclick="mostrarEditComment({{ c.id }})" title="Editar"><i class="bi bi-pencil"></i></button>
+                                    <button class="btn btn-link text-danger p-0" style="font-size: 0.8rem; text-decoration: none;" onclick="eliminarComentarioAJAX({{ c.id }})" title="Eliminar"><i class="bi bi-trash"></i></button>
+                                </div>
+                                {% endif %}
+
+                                <p class="mb-1" id="comment-text-{{ c.id }}" style="font-size:0.9rem; color:#e4e6eb;">{{ c.content }}</p>
+
+                                {% if current_user_id == c.user_id %}
+                                <form id="edit-form-{{ c.id }}" onsubmit="guardarEdicionAJAX(event, {{ c.id }})" style="display: none;" class="mt-2 mb-2">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" name="content" class="form-control" style="background:#18191a; border-color:#3a3b3c; color:#fff;" value="{{ c.content }}" required>
+                                        <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i></button>
+                                        <button type="button" class="btn btn-secondary" onclick="ocultarEditComment({{ c.id }})"><i class="bi bi-x-lg"></i></button>
+                                    </div>
+                                </form>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if session.get('user_id') %}
+                        <form onsubmit="agregarComentarioAJAX(event, {{ post.id }})" class="d-flex mt-3 gap-2">
+                            <input type="text" id="input-comentario-{{ post.id }}" class="form-control form-control-sm" style="background:#18191a; border-color:#3a3b3c; color:#fff;" placeholder="Escribe un comentario..." required>
+                            <button type="submit" class="btn btn-sm btn-secondary">Enviar</button>
+                        </form>
+                        {% else %}
+                        <p class="text-secondary small mt-2">Inicia sesión para comentar.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% if not posts %}
+                <div class="text-center py-5 text-secondary">
+                    <p style="font-size: 3rem; margin-bottom: 10px;">📭</p>
+                    <p>No hay publicaciones para mostrar.</p>
+                    {% if request.path == '/mis-comunidades' %}
+                    <a href="/" class="btn btn-outline-primary mt-3">Explorar comunidades</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </main>
+
+        <aside class="right-sidebar">
+            <div class="widget-box">
+                <div class="widget-title"><i class="bi bi-clock-history"></i> Lo más nuevo</div>
+                {% for post in posts[:4] %}
+                <div class="trending-item">
+                    <div>
+                        <a href="/categoria/{{ post.game.slug }}" class="trending-game" style="background-color: {{ post.game.accent_color }};">
+                            {{ post.game.icon_emoji }} {{ post.game.name }}
+                        </a>
+                        <span class="trending-date">{{ post.created_at.strftime('%d %b') }}</span>
+                    </div>
+                    <div class="trending-title">{{ post.title }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </aside>
+    </div>
+
+    <div class="modal fade" id="modalLogout" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content" style="background:#242526; border:1px solid #3a3b3c; border-radius:16px;">
+                <div class="modal-body text-center py-4">
+                    <p style="font-size:2rem; margin-bottom: 10px;">👋</p>
+                    <h6 class="fw-bold mb-1">¿Cerrar sesión?</h6>
+                    <div class="d-flex gap-2 justify-content-center mt-4">
+                        <button class="btn btn-secondary px-4" data-bs-dismiss="modal" style="border-radius: 20px;">Cancelar</button>
+                        <a href="/logout" class="btn btn-danger px-4" style="border-radius: 20px;">Salir</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleLike(postId, btn) {
+            fetch(`/post/${postId}/like`, { method: 'POST' })
+            .then(res => {
+                if(res.status === 401) { alert("Inicia sesión para dar me gusta."); return; }
+                return res.json();
+            })
+            .then(data => {
+                if(!data) return;
+                const icon = btn.querySelector('i');
+                const countSpan = btn.querySelector('.like-count');
+                countSpan.innerText = data.likes;
+                countSpan.style.display = data.likes > 0 ? 'inline' : 'none';
+                btn.closest('.post-card').setAttribute('data-likes', data.likes); 
+                
+                if(data.liked) {
+                    btn.classList.add('liked'); icon.classList.replace('bi-heart', 'bi-heart-fill');
+                } else {
+                    btn.classList.remove('liked'); icon.classList.replace('bi-heart-fill', 'bi-heart');
+                }
+            });
+        }
+
+        function toggleSave(postId, btn) {
+            fetch(`/post/${postId}/save`, { method: 'POST' })
+            .then(res => {
+                if(res.status === 401) { alert("Inicia sesión para guardar."); return; }
+                return res.json();
+            })
+            .then(data => {
+                if(!data) return;
+                const icon = btn.querySelector('i');
+                if(data.saved) {
+                    btn.classList.add('saved'); icon.classList.replace('bi-bookmark', 'bi-bookmark-fill');
+                } else {
+                    btn.classList.remove('saved'); icon.classList.replace('bi-bookmark-fill', 'bi-bookmark');
+                }
+            });
+        }
+
+        function toggleComments(postId) {
+            const div = document.getElementById('comments-' + postId);
+            div.style.display = div.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function ordenarPosts(tipo, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const contenedor = document.getElementById('posts-list');
+            let posts = Array.from(contenedor.querySelectorAll('.post-card'));
+            
+            if(tipo === 'populares') { posts.sort((a, b) => b.getAttribute('data-likes') - a.getAttribute('data-likes')); } 
+            else { posts.sort((a, b) => b.getAttribute('data-date') - a.getAttribute('data-date')); }
+            posts.forEach(p => contenedor.appendChild(p));
+        }
+
+        // --- FUNCIONES AJAX PARA COMENTARIOS ---
+        function mostrarEditComment(id) {
+            document.getElementById('comment-text-' + id).style.display = 'none';
+            document.getElementById('edit-form-' + id).style.display = 'flex';
+        }
+
+        function ocultarEditComment(id) {
+            document.getElementById('comment-text-' + id).style.display = 'block';
+            document.getElementById('edit-form-' + id).style.display = 'none';
+        }
+
+        function agregarComentarioAJAX(event, postId) {
+            event.preventDefault();
+            const inputComentario = document.getElementById(`input-comentario-${postId}`);
+            const content = inputComentario.value;
+            
+            fetch(`/post/${postId}/comment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: content })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    inputComentario.value = ''; 
+                    const nuevoComentarioHTML = `
+                        <div class="mb-2 position-relative" id="comment-${data.id}">
+                            <strong style="color:var(--rl-blue, #2374e1); font-size:0.9rem;">${data.username}</strong>
+                            <span class="text-secondary" style="font-size:0.75rem; margin-left:8px;">${data.date}</span>
+                            
+                            <div class="d-inline-block float-end">
+                                <button class="btn btn-link text-warning p-0 me-2" style="font-size: 0.8rem; text-decoration: none;" onclick="mostrarEditComment(${data.id})" title="Editar"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-link text-danger p-0" style="font-size: 0.8rem; text-decoration: none;" onclick="eliminarComentarioAJAX(${data.id})" title="Eliminar"><i class="bi bi-trash"></i></button>
+                            </div>
+
+                            <p class="mb-1" id="comment-text-${data.id}" style="font-size:0.9rem; color:#e4e6eb;">${data.content}</p>
+
+                            <form id="edit-form-${data.id}" onsubmit="guardarEdicionAJAX(event, ${data.id})" style="display: none;" class="mt-2 mb-2">
+                                <div class="input-group input-group-sm">
+                                    <input type="text" name="content" class="form-control" style="background:#18191a; border-color:#3a3b3c; color:#fff;" value="${data.content}" required>
+                                    <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i></button>
+                                    <button type="button" class="btn btn-secondary" onclick="ocultarEditComment(${data.id})"><i class="bi bi-x-lg"></i></button>
+                                </div>
+                            </form>
+                        </div>
+                    `;
+                    document.getElementById(`comments-list-${postId}`).insertAdjacentHTML('beforeend', nuevoComentarioHTML);
+                }
+            });
+        }
+
+        function guardarEdicionAJAX(event, commentId) {
+            event.preventDefault();
+            const inputForm = document.querySelector(`#edit-form-${commentId} input[name="content"]`);
+            const newContent = inputForm.value;
+
+            fetch(`/comment/${commentId}/edit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: newContent })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    document.getElementById('comment-text-' + commentId).innerText = data.content;
+                    ocultarEditComment(commentId);
+                }
+            });
+        }
+
+        function eliminarComentarioAJAX(commentId) {
+            if(!confirm('¿Seguro que deseas eliminar este comentario?')) return;
+            
+            fetch(`/comment/${commentId}/delete`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    document.getElementById('comment-' + commentId).style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
