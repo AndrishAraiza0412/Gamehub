@@ -1,11 +1,13 @@
 # 🚀 Guía de Ejecución - GamesHub
 
+Página web que se enfoca en un blog de videojuegos donde hay categorías.
+
 Sigue estos pasos en orden para configurar y correr el proyecto en tu computadora local:
 
 #Clonar el repositorio
 Abre tu terminal y descarga el proyecto:
 
-git clone [https://github.com/AndrishAraiza/Gameshub.git](https://github.com/AndrishAraiza/Gameshub.git)
+git clone https://github.com/AndrishAraiza0412/Gamehub.git
 cd Gameshub
 
 

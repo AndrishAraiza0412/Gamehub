@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Nueva Comunidad — Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #18191a; color: #fff; font-family: 'Segoe UI', sans-serif; }
+        .form-control, .form-select { background: #242526; border: 1px solid #3a3b3c; color: #fff; border-radius: 10px; }
+        .emoji-picker-container { max-height: 250px; overflow-y: auto; width: 280px; background: #242526; border: 1px solid #3a3b3c; padding: 10px; }
+        .emoji-btn { font-size: 1.2rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+        .emoji-section-title { font-size: 0.7rem; color: #b0b3b8; text-transform: uppercase; width: 100%; margin-top: 10px; }
+    </style>
+</head>
+<body class="p-4">
+    <div class="container" style="max-width: 800px;">
+        <h4 class="fw-bold">Nueva Comunidad</h4>
+        <form method="POST" class="row g-3 mt-3">
+            <div class="col-md-6">
+                <label class="small text-secondary">Nombre del Juego</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label class="small text-secondary">Categoría</label>
+                <select name="genre_id" class="form-select" required>
+                    {% for g in genres %}
+                    <option value="{{ g.id }}">{{ g.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="small text-secondary">Slug</label>
+                <input type="text" name="slug" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label class="small text-secondary">Emoji</label>
+                <div class="input-group">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">😀</button>
+                    <div class="dropdown-menu shadow emoji-picker-container">
+                        <div class="d-flex flex-wrap gap-1">
+                            <div class="emoji-section-title">Variados</div>
+                            <button type="button" class="btn btn-dark emoji-btn">🎮</button>
+                            <button type="button" class="btn btn-dark emoji-btn">⚔️</button>
+                            <button type="button" class="btn btn-dark emoji-btn">🛡️</button>
+                            <button type="button" class="btn btn-dark emoji-btn">🔫</button>
+                            <button type="button" class="btn btn-dark emoji-btn">🎯</button>
+                            <button type="button" class="btn btn-dark emoji-btn">🚀</button>
+                            <button type="button" class="btn btn-dark emoji-btn">👻</button>
+                            <button type="button" class="btn btn-dark emoji-btn">🧟</button>
+                            <button type="button" class="btn btn-dark emoji-btn">🏎️</button>
+                            <button type="button" class="btn btn-dark emoji-btn">⚽</button>
+                            <button type="button" class="btn btn-dark emoji-btn">🎸</button>
+                            <button type="button" class="btn btn-dark emoji-btn">🎧</button>
+                            <button type="button" class="btn btn-dark emoji-btn">💎</button>
+                            <button type="button" class="btn btn-dark emoji-btn">🌟</button>
+                        </div>
+                    </div>
+                    <input type="text" name="icon_emoji" id="emoji-in" class="form-control" placeholder="🎮">
+                </div>
+            </div>
+            <div class="col-12">
+                <label class="small text-secondary">Reseña / Información</label>
+                <textarea name="description" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="col-12">
+                <label class="small text-secondary">URL Imagen/GIF de Fondo</label>
+                <input type="url" name="banner_image" class="form-control">
+            </div>
+            <div class="col-12">
+                <label class="small text-secondary">URL Música (.mp3)</label>
+                <input type="url" name="music_url" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label class="small text-secondary">Color Banner</label>
+                <input type="color" name="banner_color" class="form-control form-control-color w-100" value="#0d1b2a">
+            </div>
+            <div class="col-md-6">
+                <label class="small text-secondary">Color Acento</label>
+                <input type="color" name="accent_color" class="form-control form-control-color w-100" value="#00aaff">
+            </div>
+            <div class="col-12 pt-3">
+                <button type="submit" class="btn btn-primary px-4">Crear Comunidad</button>
+                <a href="/admin" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll('.emoji-btn').forEach(b => {
+            b.onclick = () => document.getElementById('emoji-in').value = b.innerText;
+        });
+    </script>
+</body>
+</html>

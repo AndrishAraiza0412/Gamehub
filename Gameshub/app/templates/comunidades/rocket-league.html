@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ game.name }} — GameHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/comunidades/rocket-league.css') }}">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="top-navbar d-flex align-items-center px-4">
+        <div class="d-flex align-items-center gap-2">
+            <span class="fs-4">🎮</span>
+            <span class="fw-bold fs-5">Game<span style="color:#00aaff">Hub</span></span>
+        </div>
+        <div class="d-flex justify-content-center flex-grow-1">
+            <form action="/buscar" method="GET" class="d-flex">
+                <div class="input-group">
+                    <span class="input-group-text bg-black border-secondary text-secondary">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" name="q"
+                           class="form-control bg-black border-secondary text-white"
+                           placeholder="Buscar en GameHub..."
+                           style="width:300px;">
+                </div>
+            </form>
+        </div>
+        <div class="d-flex gap-2">
+            {% if session.get('username') %}
+                {% if session.get('role') == 'superadmin' %}
+                    <a href="/admin" class="btn btn-sm btn-warning px-3">
+                        <i class="bi bi-gear"></i> Admin
+                    </a>
+                {% endif %}
+                <span class="text-secondary small">👤 {{ session.get('username') }}</span>
+                <a href="#" class="btn btn-sm btn-secondary px-3"
+                   data-bs-toggle="modal" data-bs-target="#modalLogout">Cerrar sesión</a>
+            {% else %}
+                <a href="/login" class="btn btn-sm btn-secondary px-3">Iniciar sesión</a>
+                <a href="/register" class="btn btn-sm px-3" style="background:#00aaff; color:#fff;">Registrarse</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- HERO -->
+    <div class="rl-hero">
+        <div class="rl-hero-glow"></div>
+        <div class="rl-hero-glow2"></div>
+        <span class="rl-hero-emoji">🚗</span>
+        <div class="rl-hero-content">
+            <a href="/" class="rl-back-link"><i class="bi bi-arrow-left"></i> Volver al inicio</a>
+            <br>
+            <span class="rl-badge">🚗 Comunidad Oficial</span>
+            <h1 class="rl-title">{{ game.name }}</h1>
+            <p class="rl-desc">{{ game.description }}</p>
+            <div class="rl-stats">
+                <div class="rl-stat">
+                    <div class="rl-stat-num">{{ posts|length }}</div>
+                    <div class="rl-stat-label">Publicaciones</div>
+                </div>
+                <div class="rl-stat">
+                    <div class="rl-stat-num">{{ game.genre.name }}</div>
+                    <div class="rl-stat-label">Género</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="rl-tabs">
+        <a href="#" class="rl-tab active" onclick="mostrarTab('publicaciones', this)">📰 Publicaciones</a>
+        <a href="#" class="rl-tab" onclick="mostrarTab('guias', this)">📖 Guías</a>
+        <a href="#" class="rl-tab" onclick="mostrarTab('actualizaciones', this)">🔄 Actualizaciones</a>
+        <a href="#" class="rl-tab" onclick="mostrarTab('multimedia', this)">🖼️ Multimedia</a>
+    </div>
+
+    <!-- LAYOUT -->
+    <div class="rl-layout">
+
+        <!-- FEED -->
+        <div>
+
+            <!-- BOTÓN NUEVO POST -->
+            {% if session.get('role') == 'superadmin' or (session.get('role') == 'category_admin' and session.get('game_id') == game.id) %}
+            <div class="d-flex justify-content-end mb-3">
+                <button data-bs-toggle="modal" data-bs-target="#modalNuevoPost"
+                        class="btn btn-sm px-3"
+                        style="background:#00aaff; color:#fff; border-radius:20px;">
+                    <i class="bi bi-plus-circle me-1"></i> Nuevo post
+                </button>
+            </div>
+            {% endif %}
+
+            <!-- FILTROS -->
+            <div class="filter-bar">
+                <button class="filter-btn active">🕐 Recientes</button>
+                <button class="filter-btn">🔥 Populares</button>
+            </div>
+
+            <!-- TAB: PUBLICACIONES -->
+            <div id="tab-publicaciones">
+                {% for post in posts %}
+                <div class="post-card">
+                    <span class="tag tag-{{ post.post_type }}">{{ post.post_type }}</span>
+                    <div class="post-title">{{ post.title }}</div>
+                    <div class="post-excerpt">{{ post.content | safe }}</div>
+                    <div class="post-footer">
+                        <button class="action-btn"><i class="bi bi-heart"></i> Me gusta</button>
+                        <button class="action-btn"><i class="bi bi-chat"></i> Comentar</button>
+                        <button class="action-btn"><i class="bi bi-bookmark"></i> Guardar</button>
+                        <span class="post-date">{{ post.created_at.strftime('%d %b %Y') }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not posts %}
+                <div class="text-center py-5" style="color:rgba(255,255,255,0.3);">
+                    <p style="font-size:3rem;">🚗</p>
+                    <p>Aún no hay publicaciones.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- TAB: GUÍAS -->
+            <div id="tab-guias" style="display:none;">
+                {% set guias = posts | selectattr('post_type', 'equalto', 'guide') | list %}
+                {% for post in guias %}
+                <div class="post-card">
+                    <span class="tag tag-guide">guide</span>
+                    <div class="post-title">{{ post.title }}</div>
+                    <div class="post-excerpt">{{ post.content | safe }}</div>
+                    <div class="post-footer">
+                        <button class="action-btn"><i class="bi bi-heart"></i> Me gusta</button>
+                        <button class="action-btn"><i class="bi bi-chat"></i> Comentar</button>
+                        <button class="action-btn"><i class="bi bi-bookmark"></i> Guardar</button>
+                        <span class="post-date">{{ post.created_at.strftime('%d %b %Y') }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not guias %}
+                <div class="text-center py-5" style="color:rgba(255,255,255,0.3);">
+                    <p style="font-size:3rem;">📖</p>
+                    <p>Aún no hay guías.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- TAB: ACTUALIZACIONES -->
+            <div id="tab-actualizaciones" style="display:none;">
+                {% set updates = posts | selectattr('post_type', 'equalto', 'update') | list %}
+                {% for post in updates %}
+                <div class="post-card">
+                    <span class="tag tag-update">update</span>
+                    <div class="post-title">{{ post.title }}</div>
+                    <div class="post-excerpt">{{ post.content | safe }}</div>
+                    <div class="post-footer">
+                        <button class="action-btn"><i class="bi bi-heart"></i> Me gusta</button>
+                        <button class="action-btn"><i class="bi bi-chat"></i> Comentar</button>
+                        <button class="action-btn"><i class="bi bi-bookmark"></i> Guardar</button>
+                        <span class="post-date">{{ post.created_at.strftime('%d %b %Y') }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not updates %}
+                <div class="text-center py-5" style="color:rgba(255,255,255,0.3);">
+                    <p style="font-size:3rem;">🔄</p>
+                    <p>Aún no hay actualizaciones.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- TAB: MULTIMEDIA -->
+            <div id="tab-multimedia" style="display:none;">
+                {% if multimedia %}
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    {% for post in multimedia %}
+                    <div class="post-card">
+                        <div class="post-title mb-2">{{ post.title }}</div>
+                        {{ post.content | safe }}
+                        <div class="post-footer mt-2">
+                            <button class="action-btn"><i class="bi bi-heart"></i> Me gusta</button>
+                            <span class="post-date">{{ post.created_at.strftime('%d %b %Y') }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5" style="color:rgba(255,255,255,0.3);">
+                    <p style="font-size:3rem;">🖼️</p>
+                    <p>Aún no hay multimedia.</p>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <!-- PANEL DERECHO -->
+        <div>
+            <div class="info-card">
+                <p class="info-card-title">Sobre la comunidad</p>
+                <p style="font-size:0.88rem; color:rgba(255,255,255,0.45); margin-bottom:14px;">
+                    {{ game.description }}
+                </p>
+                <button class="join-btn">
+                    <i class="bi bi-plus-circle me-1"></i> Unirse a la comunidad
+                </button>
+            </div>
+
+            <div class="info-card">
+                <p class="info-card-title">🔥 Top publicaciones</p>
+                {% for post in posts[:5] %}
+                <div class="top-item">
+                    <span class="top-num">{{ loop.index }}</span>
+                    <div>
+                        <div class="top-title">{{ post.title }}</div>
+                        <div class="top-date">{{ post.created_at.strftime('%d %b %Y') }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="info-card">
+                <p class="info-card-title">🎮 Otras comunidades</p>
+                {% for g in games %}
+                {% if g.id != game.id %}
+                <a href="/categoria/{{ g.slug }}" class="other-game-link">
+                    <span>{{ g.icon_emoji }}</span>
+                    <span>{{ g.name }}</span>
+                </a>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL NUEVO POST -->
+    <div class="modal fade" id="modalNuevoPost" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background:#242526; border:1px solid #3a3b3c; border-radius:16px;">
+                <div class="modal-header" style="border-bottom:1px solid #3a3b3c;">
+                    <h6 class="modal-title fw-bold w-100 text-center">Crear publicación</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="/admin/nuevo" id="formPost">
+                        <input type="hidden" name="game_id" value="{{ game.id }}">
+                        <input type="hidden" name="post_type" id="post_type_hidden" value="news">
+                        <input type="hidden" name="content" id="contentFinal">
+
+                        <input type="text" name="title"
+                               class="form-control mb-3"
+                               style="background:#18191a; border:1px solid #3a3b3c; color:#e4e6eb; border-radius:10px;"
+                               placeholder="Título del post" required>
+
+                        <textarea id="postContent" rows="4"
+                                  class="form-control mb-3"
+                                  style="background:#18191a; border:none; color:#e4e6eb; font-size:1rem; resize:none; border-radius:10px;"
+                                  placeholder="¿Qué estás pensando?"></textarea>
+
+                        <div id="imgPreview" style="display:none; margin-bottom:12px;">
+                            <img id="imgPreviewSrc" src="" style="width:100%; border-radius:10px; max-height:200px; object-fit:cover;">
+                            <button type="button" onclick="quitarImagen()" class="btn btn-sm btn-danger mt-1">
+                                <i class="bi bi-x"></i> Quitar imagen
+                            </button>
+                        </div>
+
+                        <div id="videoPreview" style="display:none; margin-bottom:12px;">
+                            <div id="videoEmbed"></div>
+                            <button type="button" onclick="quitarVideo()" class="btn btn-sm btn-danger mt-1">
+                                <i class="bi bi-x"></i> Quitar video
+                            </button>
+                        </div>
+
+                        <div style="border:1px solid #3a3b3c; border-radius:10px; padding:10px 14px;"
+                             class="d-flex align-items-center justify-content-between mb-3">
+                            <span style="font-size:0.85rem; color:#b0b3b8;">Agregar a tu publicación</span>
+                            <div class="d-flex gap-2">
+                                <button type="button" onclick="pedirImagen()"
+                                        class="btn btn-sm"
+                                        style="background:rgba(0,204,100,0.1); border-radius:8px;"
+                                        title="Agregar imagen">
+                                    <i class="bi bi-image" style="color:#00cc66; font-size:1.2rem;"></i>
+                                </button>
+                                <button type="button" onclick="pedirVideo()"
+                                        class="btn btn-sm"
+                                        style="background:rgba(255,0,0,0.1); border-radius:8px;"
+                                        title="Agregar video YouTube">
+                                    <i class="bi bi-youtube" style="color:#ff0000; font-size:1.2rem;"></i>
+                                </button>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm dropdown-toggle" id="btnTipo"
+                                            style="background:rgba(35,116,225,0.1); color:#2374e1; border-radius:8px;"
+                                            data-bs-toggle="dropdown">
+                                        📰 Tipo
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="#" onclick="setTipo('news')">📰 Noticia</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="setTipo('guide')">📖 Guía</a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="setTipo('update')">🔄 Actualización</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="prepararEnvio()"
+                                class="btn w-100"
+                                style="background:#2374e1; color:#fff; border-radius:10px; font-weight:600;">
+                            Publicar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL LOGOUT -->
+    <div class="modal fade" id="modalLogout" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content" style="background:#242526; border:1px solid #3a3b3c; border-radius:16px;">
+                <div class="modal-body text-center py-4">
+                    <p style="font-size:2rem;">👋</p>
+                    <h6 class="fw-bold mb-1">¿Cerrar sesión?</h6>
+                    <p class="text-secondary small mb-4">¿Estás seguro de que quieres salir?</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <a href="/logout" class="btn btn-danger px-4">Cerrar sesión</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let imagenUrl = '';
+        let videoId   = '';
+
+        function mostrarTab(tab, el) {
+            document.getElementById('tab-publicaciones').style.display   = 'none';
+            document.getElementById('tab-guias').style.display           = 'none';
+            document.getElementById('tab-actualizaciones').style.display = 'none';
+            document.getElementById('tab-multimedia').style.display      = 'none';
+            document.getElementById('tab-' + tab).style.display = 'block';
+            document.querySelectorAll('.rl-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function pedirImagen() {
+            const url = prompt('Pega la URL de la imagen:');
+            if (url) {
+                imagenUrl = url;
+                document.getElementById('imgPreviewSrc').src = url;
+                document.getElementById('imgPreview').style.display = 'block';
+            }
+        }
+
+        function quitarImagen() {
+            imagenUrl = '';
+            document.getElementById('imgPreview').style.display = 'none';
+            document.getElementById('imgPreviewSrc').src = '';
+        }
+
+        function pedirVideo() {
+            const url = prompt('Pega el link de YouTube:');
+            if (url) {
+                videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
+                const embed = `<iframe width="100%" height="200" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+                document.getElementById('videoEmbed').innerHTML = embed;
+                document.getElementById('videoPreview').style.display = 'block';
+            }
+        }
+
+        function quitarVideo() {
+            videoId = '';
+            document.getElementById('videoPreview').style.display = 'none';
+            document.getElementById('videoEmbed').innerHTML = '';
+        }
+
+        function setTipo(tipo) {
+            document.getElementById('post_type_hidden').value = tipo;
+            const labels = { news: '📰 Noticia', guide: '📖 Guía', update: '🔄 Actualización' };
+            document.getElementById('btnTipo').textContent = labels[tipo];
+        }
+
+        function prepararEnvio() {
+            let contenido = document.getElementById('postContent').value;
+            if (!contenido.trim()) {
+                alert('Escribe algo antes de publicar.');
+                return;
+            }
+            if (imagenUrl) contenido += `\n<img src="${imagenUrl}" style="width:100%; border-radius:10px; margin-top:10px;">`;
+            if (videoId)   contenido += `\n<iframe width="100%" height="300" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen style="border-radius:10px; margin-top:10px;"></iframe>`;
+            document.getElementById('contentFinal').value = contenido;
+            document.getElementById('formPost').submit();
+        }
+    </script>
+</body>
+</html>
